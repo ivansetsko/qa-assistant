@@ -339,17 +339,19 @@ input[type="text"]:focus {
     display: flex;
     justify-content: center;
     gap: 2rem;
-    flex-wrap: wrap;
     margin-top: 3rem;
+    flex-wrap: nowrap; /* Изменение: теперь не переносится */
 }
 
 .feature-card {
     background: white;
     padding: 2rem;
     border-radius: 15px;
-    width: 250px;
+    width: 100%; /* Изменение: теперь занимает всю доступную ширину */
+    max-width: 300px; /* Ограничиваем максимальную ширину */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s;
+    flex: 1; /* Добавляем: карточки растягиваются равномерно */
 }
 
 .feature-card:hover {
@@ -776,6 +778,15 @@ footer {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
+    .features {
+        flex-wrap: wrap; /* На мобильных переносим */
+    }
+    
+    .feature-card {
+        max-width: 100%; /* На мобильных занимают всю ширину */
+        margin-bottom: 1rem;
+    }
+}
     .nav-links {
         display: none;
         position: absolute;
