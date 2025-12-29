@@ -4,7 +4,7 @@
 // Конфигурация - ВАШ URL GOOGLE APPS SCRIPT СЮДА
 const CONFIG = {
   demoMode: false, // Сразу включаем ИИ режим
-  apiUrl: 'https://script.google.com/macros/s/AKfycbztauAbh6Io30BbCY6TqB2GBZxD1vpeqm2lcZ7JPwocHZDhfN1Q6Zn0PQP2rg6FH-DTWg/exec', // ВАШ URL ЗДЕСЬ
+  apiUrl: 'https://script.google.com/macros/s/AKfycbx-SuOkhe0xDVuKEt-vvXFHdTk0wSe49PM-pQttLHshKcSJdtS22P5kimFs--iSXdU97A/exec', // ВАШ URL ЗДЕСЬ
   requestCount: parseInt(localStorage.getItem('qa_ai_requests')) || 0,
   maxRequestsPerDay: 50
 };
