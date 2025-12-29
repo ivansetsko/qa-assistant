@@ -778,15 +778,6 @@ footer {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-    .features {
-        flex-wrap: wrap; /* На мобильных переносим */
-    }
-    
-    .feature-card {
-        max-width: 100%; /* На мобильных занимают всю ширину */
-        margin-bottom: 1rem;
-    }
-}
     .nav-links {
         display: none;
         position: absolute;
@@ -817,6 +808,14 @@ footer {
     
     .features, .info-grid {
         grid-template-columns: 1fr;
+         display: flex;
+        flex-wrap: wrap; /* важно: разрешаем перенос */
+        gap: 1.5rem;
+    }
+    
+    .feature-card {
+        flex: 0 0 100%; /* каждая карточка - 100% ширины */
+        max-width: 100%;
     }
     
     .tool-container {
