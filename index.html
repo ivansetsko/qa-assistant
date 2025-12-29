@@ -21,7 +21,7 @@
                 <li><a href="#tools"><i class="fas fa-tools"></i> Инструменты</a></li>
                 <li><a href="#" onclick="openModal()"><i class="fas fa-cog"></i> Настройка ИИ</a></li>
             </ul>
-            <button class="mobile-menu-btn" onclick="toggleMenu()">
+            <button class="mobile-menu-btn" onclick="toggleMenu()" aria-label="Открыть меню">
                 <i class="fas fa-bars"></i>
             </button>
         </nav>
@@ -40,7 +40,7 @@
                     <div class="step-number">1</div>
                     <div class="step-content">
                         <h3><i class="fas fa-key"></i> Получи API ключ</h3>
-                        <p>Бесплатно на <a href="https://platform.deepseek.com" target="_blank">DeepSeek</a></p>
+                        <p>Бесплатно на <a href="https://platform.deepseek.com" target="_blank" rel="noopener">DeepSeek</a></p>
                         <p>→ Зарегистрируйся → API Keys → Create new key</p>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
                         <p>Используй этот URL (уже настроен):</p>
                         <div class="api-url-box">
                             <code id="proxyUrl">https://script.google.com/macros/s/AKfycbx-SuOkhe0xDVuKEt-vvXFHdTk0wSe49PM-pQttLHshKcSJdtS22P5kimFs--iSXdU97A/exec</code>
-                            <button class="btn-copy" onclick="copyProxyUrl()">
+                            <button class="btn-copy" onclick="copyProxyUrl()" aria-label="Копировать URL">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
@@ -140,8 +140,8 @@
                     
                     <div class="mode-switcher">
                         <span class="mode-label">Режим:</span>
-                        <label class="switch">
-                            <input type="checkbox" id="modeToggle1" onchange="toggleMode(1)" checked>
+                        <label class="switch" for="modeToggle1">
+                            <input type="checkbox" id="modeToggle1" onchange="toggleMode(1)" checked aria-label="Переключатель режима ИИ для генератора тест-дизайна">
                             <span class="slider"></span>
                         </label>
                         <span class="mode-status" id="modeStatus1">ИИ</span>
@@ -204,8 +204,8 @@
                     
                     <div class="mode-switcher">
                         <span class="mode-label">Режим:</span>
-                        <label class="switch">
-                            <input type="checkbox" id="modeToggle2" onchange="toggleMode(2)" checked>
+                        <label class="switch" for="modeToggle2">
+                            <input type="checkbox" id="modeToggle2" onchange="toggleMode(2)" checked aria-label="Переключатель режима ИИ для генератора баг-репортов">
                             <span class="slider"></span>
                         </label>
                         <span class="mode-status" id="modeStatus2">ИИ</span>
@@ -359,7 +359,7 @@
             </div>
             <p class="footer-copyright">
                 © 2024 QA Assistant AI | 
-                <a href="https://github.com/ivansetsko/qa-assistant" target="_blank">
+                <a href="https://github.com/ivansetsko/qa-assistant" target="_blank" rel="noopener">
                     <i class="fab fa-github"></i> GitHub
                 </a>
             </p>

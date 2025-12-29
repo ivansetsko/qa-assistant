@@ -120,23 +120,33 @@ async function generateWithAI(prompt, type) {
     throw new Error('Достигнут дневной лимит запросов. Попробуйте завтра.');
   }
   
-  const response = await fetch(CONFIG.apiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, type })
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Ошибка сервера: ${response.status}`);
+  try {
+    const response = await fetch(CONFIG.apiUrl, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json' 
+      },
+      body: JSON.stringify({ prompt, type })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Ошибка сервера: ${response.status} - ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Ошибка обработки запроса ИИ');
+    }
+    
+    return data.result;
+  } catch (error) {
+    console.error('Ошибка при запросе к ИИ:', error);
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Ошибка соединения с API. Проверьте настройки прокси и доступность сервиса.');
+    }
+    throw error;
   }
-  
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Ошибка обработки запроса ИИ');
-  }
-  
-  return data.result;
 }
 
 // ===== ПРОМПТЫ =====
