@@ -12,6 +12,21 @@ const CONFIG = {
 // DOM элементы
 let currentGenerationType = '';
 
+// Функции управления загрузочным экраном
+function showLoadingScreen() {
+    const loadingScreen = document.getElementById('loadingScreen');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'flex';
+    }
+}
+
+function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loadingScreen');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'none';
+    }
+}
+
 // Инициализация
 document.addEventListener('DOMContentLoaded', function() {
   updateAIStatus();
@@ -19,6 +34,9 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Добавляем переключатель ИИ/Демо
   addAIToggle();
+  
+  // Скрываем загрузочный экран при загрузке страницы
+  hideLoadingScreen();
 });
 
 // ===== ОСНОВНЫЕ ФУНКЦИИ ГЕНЕРАЦИИ =====
@@ -63,6 +81,7 @@ async function generateBugReport() {
 
 // Основная функция генерации
 async function generateContent(prompt, type, outputElement) {
+  showLoadingScreen();
   showLoading(outputElement);
   
   if (CONFIG.demoMode || !CONFIG.apiUrl) {
@@ -71,6 +90,7 @@ async function generateContent(prompt, type, outputElement) {
       const result = generateDemoContent(prompt, type);
       outputElement.innerHTML = result;
       incrementRequestCount();
+      hideLoadingScreen();
     }, 1500);
   } else {
     // Режим с реальным ИИ
@@ -78,6 +98,7 @@ async function generateContent(prompt, type, outputElement) {
       const result = await generateWithAI(prompt, type);
       outputElement.innerHTML = result;
       incrementRequestCount();
+      hideLoadingScreen();
     } catch (error) {
       outputElement.innerHTML = `
         <div style="color: #dc2626; padding: 20px;">
@@ -86,6 +107,7 @@ async function generateContent(prompt, type, outputElement) {
           <p>Переключаю в демо-режим...</p>
         </div>
       `;
+      hideLoadingScreen();
       // Автоматически переключаем в демо
       CONFIG.demoMode = true;
       updateAIToggle();
@@ -279,54 +301,49 @@ function copyResult(elementId) {
     });
 }
 
+function clearResult(elementId) {
+  document.getElementById(elementId).innerHTML = `
+    <div class="placeholder-text">
+      <i class="fas fa-lightbulb"></i>
+      <p>Здесь появятся результаты...</p>
+    </div>
+  `;
+}
+
 // ===== УПРАВЛЕНИЕ ИИ ПОДКЛЮЧЕНИЕМ =====
 
 function addAIToggle() {
-  const tools = document.querySelectorAll('.tool-card');
-  tools.forEach(tool => {
-    const toggleHTML = `
-      <div class="ai-toggle">
-        <span>🤖 Режим:</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="aiToggle" ${CONFIG.demoMode ? '' : 'checked'} onchange="toggleAIMode()">
-          <span class="toggle-slider"></span>
-        </label>
-        <span>${CONFIG.demoMode ? 'Демо' : 'ИИ'}</span>
-        <div class="ai-status ${CONFIG.apiUrl ? 'connected' : 'disconnected'}">
-          ${CONFIG.apiUrl ? '✓ ИИ подключен' : '⚠️ ИИ не настроен'}
-        </div>
-      </div>
-    `;
-    tool.insertAdjacentHTML('afterbegin', toggleHTML);
-  });
+  // Эта функция уже реализована в HTML переключателями
+  // Здесь можно добавить дополнительную логику если нужно
 }
 
-function toggleAIMode() {
-  const toggle = document.getElementById('aiToggle');
-  CONFIG.demoMode = !toggle.checked;
-  updateAIStatus();
+function toggleMode(toolNumber) {
+  const toggle = document.getElementById(`modeToggle${toolNumber}`);
+  const status = document.getElementById(`modeStatus${toolNumber}`);
+  
+  if (toggle.checked) {
+    status.textContent = 'ИИ';
+    status.style.color = '#10b981';
+    // Проверяем наличие API URL
+    if (!CONFIG.apiUrl) {
+      alert('⚠️ Сначала настройте ИИ подключение в настройках');
+      toggle.checked = false;
+      status.textContent = 'Демо';
+      status.style.color = '';
+      openModal();
+    }
+  } else {
+    status.textContent = 'Демо';
+    status.style.color = '';
+  }
 }
 
 function updateAIStatus() {
-  const statusElements = document.querySelectorAll('.ai-status');
-  statusElements.forEach(el => {
-    if (CONFIG.apiUrl && !CONFIG.demoMode) {
-      el.textContent = '✓ ИИ подключен';
-      el.className = 'ai-status connected';
-    } else if (CONFIG.demoMode) {
-      el.textContent = '⚡ Демо-режим';
-      el.className = 'ai-status disconnected';
-    } else {
-      el.textContent = '⚠️ ИИ не настроен';
-      el.className = 'ai-status disconnected';
-    }
-  });
-}
-
-function updateAIToggle() {
-  const toggle = document.getElementById('aiToggle');
-  if (toggle) {
-    toggle.checked = !CONFIG.demoMode;
+  // Обновляем статус в подвале
+  const currentModeElement = document.getElementById('currentMode');
+  if (currentModeElement) {
+    const isAIActive = !CONFIG.demoMode && CONFIG.apiUrl;
+    currentModeElement.textContent = isAIActive ? 'Режим: ИИ' : 'Режим: Демо';
   }
 }
 
@@ -340,59 +357,23 @@ function closeModal() {
   document.getElementById('aiSetupModal').style.display = 'none';
 }
 
-function copyScriptCode() {
-  const scriptCode = `// Вставь этот код в Google Apps Script
-const API_KEY = 'ТВОЙ_API_КЛЮЧ_ЗДЕСЬ';
-
-function doPost(e) {
-  try {
-    const data = JSON.parse(e.postData.contents);
-    const { prompt, type } = data;
-    
-    let systemPrompt = '';
-    if (type === 'test-design') {
-      systemPrompt = 'Ты — опытный QA инженер. Создай подробные тест-кейсы.';
-    } else {
-      systemPrompt = 'Ты — QA lead. Создай профессиональный баг-репорт.';
-    }
-    
-    const response = UrlFetchApp.fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': \`Bearer \${API_KEY}\`
-      },
-      payload: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 1500
-      })
+function copyProxyUrl() {
+  const proxyUrl = document.getElementById('proxyUrl').textContent;
+  navigator.clipboard.writeText(proxyUrl)
+    .then(() => {
+      const btn = document.querySelector('.btn-copy');
+      if (btn) {
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Скопировано!';
+        setTimeout(() => {
+          btn.innerHTML = original;
+        }, 2000);
+      }
+      alert('URL скопирован в буфер обмена!');
+    })
+    .catch(err => {
+      alert('Ошибка копирования: ' + err);
     });
-    
-    const result = JSON.parse(response.getContentText());
-    
-    return ContentService
-      .createTextOutput(JSON.stringify({ 
-        success: true, 
-        result: result.choices[0].message.content 
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
-      
-  } catch (error) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ 
-        success: false, 
-        error: error.toString() 
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}`;
-
-  navigator.clipboard.writeText(scriptCode)
-    .then(() => alert('Код скопирован! Вставь его в Google Apps Script'));
 }
 
 function saveAPIUrl() {
@@ -414,26 +395,71 @@ function saveAPIUrl() {
   closeModal();
 }
 
+function testConnection() {
+  if (!CONFIG.apiUrl) {
+    alert('Сначала сохраните API URL');
+    return;
+  }
+  
+  showLoadingScreen();
+  
+  // Тестовый запрос
+  const testPrompt = 'Тестовый запрос';
+  const testType = 'test-design';
+  
+  fetch(CONFIG.apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: testPrompt, type: testType })
+  })
+  .then(response => response.json())
+  .then(data => {
+    hideLoadingScreen();
+    if (data.success) {
+      alert('✅ Подключение успешно! ИИ готов к работе.');
+    } else {
+      alert('❌ Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+    }
+  })
+  .catch(error => {
+    hideLoadingScreen();
+    alert('❌ Ошибка сети: ' + error.message);
+  });
+}
+
 // ===== СЧЕТЧИК ЗАПРОСОВ =====
 
 function incrementRequestCount() {
   CONFIG.requestCount++;
   localStorage.setItem('qa_ai_requests', CONFIG.requestCount);
   updateRequestCounter();
+  
+  // Обновляем счетчики в каждом инструменте
+  const tool1Count = document.getElementById('requestsCount1');
+  const tool2Count = document.getElementById('requestsCount2');
+  const totalRequests = document.getElementById('totalRequests');
+  
+  if (tool1Count) tool1Count.textContent = `Запросов: ${CONFIG.requestCount}`;
+  if (tool2Count) tool2Count.textContent = `Запросов: ${CONFIG.requestCount}`;
+  if (totalRequests) totalRequests.textContent = `Всего запросов: ${CONFIG.requestCount}`;
 }
 
 function loadRequestCount() {
-  const counter = document.getElementById('requestCounter');
-  if (counter) {
-    counter.textContent = CONFIG.requestCount;
-  }
+  updateRequestCounter();
 }
 
 function updateRequestCounter() {
-  const counter = document.getElementById('requestCounter');
-  if (counter) {
-    counter.textContent = CONFIG.requestCount;
+  const totalRequests = document.getElementById('totalRequests');
+  if (totalRequests) {
+    totalRequests.textContent = `Всего запросов: ${CONFIG.requestCount}`;
   }
+}
+
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+
+function toggleMenu() {
+  const navLinks = document.querySelector('.nav-links');
+  navLinks.classList.toggle('active');
 }
 
 // Закрытие модалки при клике вне ее
@@ -444,15 +470,21 @@ window.onclick = function(event) {
   }
 };
 
-// Добавляем счетчик запросов в подвал
-document.addEventListener('DOMContentLoaded', function() {
-  const footer = document.querySelector('footer .container');
-  if (footer) {
-    footer.innerHTML += `
-      <div style="margin-top: 20px; font-size: 14px; color: #94a3b8;">
-        Запросов сегодня: <span id="requestCounter">${CONFIG.requestCount}</span> | 
-        Режим: <span id="modeIndicator">${CONFIG.demoMode ? 'Демо' : 'ИИ'}</span>
-      </div>
-    `;
+// Обработка мобильного меню
+document.addEventListener('click', function(event) {
+  const navLinks = document.querySelector('.nav-links');
+  const mobileBtn = document.querySelector('.mobile-menu-btn');
+  
+  if (navLinks.classList.contains('active') && 
+      !event.target.closest('.nav-links') && 
+      !event.target.closest('.mobile-menu-btn')) {
+    navLinks.classList.remove('active');
   }
 });
+
+// Убедимся, что загрузочный экран скрыт при любых действиях пользователя
+document.addEventListener('click', hideLoadingScreen);
+document.addEventListener('keydown', hideLoadingScreen);
+
+// Финальное скрытие загрузочного экрана при полной загрузке
+window.addEventListener('load', hideLoadingScreen);
