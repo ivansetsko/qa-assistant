@@ -51,7 +51,7 @@
                         <h3><i class="fas fa-code"></i> Готовый прокси-скрипт</h3>
                         <p>Используй этот URL (уже настроен):</p>
                         <div class="api-url-box">
-                            <code id="proxyUrl">https://script.google.com/macros/s/AKfycbz4qUMqL5n7p6AzcoBdX7nZ-OKF1K8pPkSjeaTv-SVxKY3o-Ba6fXQ10yW7YHX2_2HD/exec</code>
+                            <code id="proxyUrl">https://script.google.com/macros/s/AKfycbx-SuOkhe0xDVuKEt-vvXFHdTk0wSe49PM-pQttLHshKcSJdtS22P5kimFs--iSXdU97A/exec</code>
                             <button class="btn-copy" onclick="copyProxyUrl()">
                                 <i class="fas fa-copy"></i>
                             </button>
@@ -67,7 +67,7 @@
                         <input type="text" 
                                id="apiUrlInput" 
                                placeholder="https://script.google.com/macros/s/..."
-                               value="https://script.google.com/macros/s/AKfycbz4qUMqL5n7p6AzcoBdX7nZ-OKF1K8pPkSjeaTv-SVxKY3o-Ba6fXQ10yW7YHX2_2HD/exec">
+                               value="https://script.google.com/macros/s/AKfycbx-SuOkhe0xDVuKEt-vvXFHdTk0wSe49PM-pQttLHshKcSJdtS22P5kimFs--iSXdU97A/exec">
                         <button class="btn-save" onclick="saveAPIUrl()">
                             <i class="fas fa-save"></i> Сохранить
                         </button>
@@ -141,10 +141,10 @@
                     <div class="mode-switcher">
                         <span class="mode-label">Режим:</span>
                         <label class="switch">
-                            <input type="checkbox" id="modeToggle1" onchange="toggleMode(1)">
+                            <input type="checkbox" id="modeToggle1" onchange="toggleMode(1)" checked>
                             <span class="slider"></span>
                         </label>
-                        <span class="mode-status" id="modeStatus1">Демо</span>
+                        <span class="mode-status" id="modeStatus1">ИИ</span>
                         <span class="requests-count" id="requestsCount1">Запросов: 0</span>
                     </div>
                 </div>
@@ -205,10 +205,10 @@
                     <div class="mode-switcher">
                         <span class="mode-label">Режим:</span>
                         <label class="switch">
-                            <input type="checkbox" id="modeToggle2" onchange="toggleMode(2)">
+                            <input type="checkbox" id="modeToggle2" onchange="toggleMode(2)" checked>
                             <span class="slider"></span>
                         </label>
-                        <span class="mode-status" id="modeStatus2">Демо</span>
+                        <span class="mode-status" id="modeStatus2">ИИ</span>
                         <span class="requests-count" id="requestsCount2">Запросов: 0</span>
                     </div>
                 </div>
@@ -336,7 +336,7 @@
                 
                 <div class="demo-note">
                     <i class="fas fa-info-circle"></i>
-                    <p><strong>Демо-режим:</strong> Работает сразу без настройки. <strong>ИИ-режим:</strong> Требует настройки (кнопка "Настройка ИИ" в шапке).</p>
+                    <p><strong>ИИ-режим активен!</strong> Все генерации используют реальный искусственный интеллект DeepSeek.</p>
                 </div>
             </div>
         </section>
@@ -353,7 +353,7 @@
             <div class="footer-stats">
                 <span id="totalRequests">Всего запросов: 0</span>
                 <span>•</span>
-                <span id="currentMode">Режим: Демо</span>
+                <span id="currentMode" style="color: #10b981;">Режим: ИИ Active</span>
                 <span>•</span>
                 <span>Версия: 2.0</span>
             </div>

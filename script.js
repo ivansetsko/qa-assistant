@@ -1,16 +1,13 @@
 // QA Assistant AI - Основной скрипт
 // ==================================
 
-// Конфигурация - ВАШ URL GOOGLE APPS SCRIPT СЮДА
+// КОНФИГУРАЦИЯ С РЕАЛЬНЫМ URL
 const CONFIG = {
-  demoMode: false, // Сразу включаем ИИ режим
-  apiUrl: 'https://script.google.com/macros/s/AKfycbx-SuOkhe0xDVuKEt-vvXFHdTk0wSe49PM-pQttLHshKcSJdtS22P5kimFs--iSXdU97A/exec', // ВАШ URL ЗДЕСЬ
+  demoMode: false, // Режим ИИ по умолчанию
+  apiUrl: 'https://script.google.com/macros/s/AKfycbx-SuOkhe0xDVuKEt-vvXFHdTk0wSe49PM-pQttLHshKcSJdtS22P5kimFs--iSXdU97A/exec',
   requestCount: parseInt(localStorage.getItem('qa_ai_requests')) || 0,
-  maxRequestsPerDay: 50
+  maxRequestsPerDay: 1000
 };
-
-// DOM элементы
-let currentGenerationType = '';
 
 // Функции управления загрузочным экраном
 function showLoadingScreen() {
@@ -29,19 +26,18 @@ function hideLoadingScreen() {
 
 // Инициализация
 document.addEventListener('DOMContentLoaded', function() {
-  updateUI();
+  console.log('QA Assistant AI запущен');
+  console.log('Режим:', CONFIG.demoMode ? 'Демо' : 'ИИ');
+  console.log('API URL:', CONFIG.apiUrl);
+  
+  updateRequestCounter();
   hideLoadingScreen();
   
-  // Показываем что ИИ активен
-  setTimeout(() => {
-    const demoNote = document.querySelector('.demo-note');
-    if (demoNote) {
-      demoNote.innerHTML = `
-        <i class="fas fa-check-circle" style="color: #10b981;"></i>
-        <p><strong>ИИ-режим активен!</strong> Теперь все генерации используют реальный искусственный интеллект DeepSeek.</p>
-      `;
-    }
-  }, 1000);
+  // Убедимся что переключатели в правильном положении
+  const toggle1 = document.getElementById('modeToggle1');
+  const toggle2 = document.getElementById('modeToggle2');
+  if (toggle1) toggle1.checked = true;
+  if (toggle2) toggle2.checked = true;
 });
 
 // ===== ОСНОВНЫЕ ФУНКЦИИ ГЕНЕРАЦИИ =====
@@ -57,9 +53,7 @@ async function generateTestCases() {
     return;
   }
   
-  currentGenerationType = 'test-design';
   const prompt = createTestDesignPrompt(input, type);
-  
   await generateContent(prompt, 'test-design', output);
 }
 
@@ -78,9 +72,7 @@ async function generateBugReport() {
     return;
   }
   
-  currentGenerationType = 'bug-report';
   const prompt = createBugReportPrompt(title, steps, expected, actual, severity, priority);
-  
   await generateContent(prompt, 'bug-report', output);
 }
 
@@ -89,54 +81,155 @@ async function generateContent(prompt, type, outputElement) {
   showLoadingScreen();
   showLoading(outputElement);
   
-  try {
-    // Всегда используем ИИ
-    const result = await generateWithAI(prompt, type);
-    outputElement.innerHTML = formatAIResponse(result);
-    incrementRequestCount();
-  } catch (error) {
-    console.error('AI Error:', error);
-    outputElement.innerHTML = `
-      <div style="color: #dc2626; padding: 20px; text-align: center;">
-        <h4>❌ Ошибка ИИ</h4>
-        <p>${error.message || 'Неизвестная ошибка'}</p>
-        <p>Попробуйте еще раз через несколько секунд</p>
-      </div>
-    `;
-  } finally {
-    hideLoadingScreen();
+  if (CONFIG.demoMode || !CONFIG.apiUrl) {
+    // Демо-режим (запасной вариант)
+    setTimeout(() => {
+      const result = generateDemoContent(prompt, type);
+      outputElement.innerHTML = result;
+      incrementRequestCount();
+      hideLoadingScreen();
+    }, 1500);
+  } else {
+    // Режим с реальным ИИ
+    try {
+      const result = await generateWithAI(prompt, type);
+      outputElement.innerHTML = formatAIResponse(result);
+      incrementRequestCount();
+    } catch (error) {
+      console.error('Ошибка ИИ:', error);
+      outputElement.innerHTML = `
+        <div style="color: #dc2626; padding: 20px; text-align: center;">
+          <h4>❌ Ошибка ИИ</h4>
+          <p>${error.message || 'Неизвестная ошибка'}</p>
+          <p>Попробуйте еще раз через несколько секунд</p>
+        </div>
+      `;
+    } finally {
+      hideLoadingScreen();
+    }
   }
 }
 
-// ===== РЕАЛЬНЫЙ ИИ (DeepSeek через ваш прокси) =====
+// ===== РЕАЛЬНЫЙ ИИ (DeepSeek через твой прокси) =====
 
 async function generateWithAI(prompt, type) {
   if (!CONFIG.apiUrl) {
     throw new Error('ИИ сервис временно недоступен');
   }
   
-  // Проверка лимита запросов
-  if (CONFIG.requestCount >= CONFIG.maxRequestsPerDay) {
-    throw new Error('Достигнут дневной лимит запросов. Попробуйте завтра.');
+  console.log('Отправка запроса к ИИ...', { type, promptLength: prompt.length });
+  
+  // Таймаут 45 секунд
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
+  
+  try {
+    const response = await fetch(CONFIG.apiUrl, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ prompt, type }),
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`Ошибка сервера: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('Ответ от ИИ получен');
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Ошибка обработки запроса');
+    }
+    
+    return data.result;
+    
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('Таймаут запроса. Сервер не ответил за 45 секунд');
+    }
+    throw error;
   }
-  
-  const response = await fetch(CONFIG.apiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, type })
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Ошибка сервера: ${response.status}`);
+}
+
+// ===== ДЕМО-РЕЖИМ (запасной вариант) =====
+
+function generateDemoContent(prompt, type) {
+  if (type === 'test-design') {
+    return `
+<div class="ai-response">
+🎯 <b>СГЕНЕРИРОВАННЫЕ ТЕСТ-КЕЙСЫ</b>
+─────────────────────────────
+<i>Пример ответа от ИИ</i>
+
+✅ <u>ТЕСТ-КЕЙС 1: ПОЗИТИВНЫЙ СЦЕНАРИЙ</u>
+<b>Цель:</b> Проверка успешного выполнения основной функции
+<b>Предусловия:</b> Система доступна, пользователь авторизован
+<b>Шаги:</b>
+1. Заполнить все обязательные поля валидными данными
+2. Нажать основную кнопку действия
+<b>Ожидаемый результат:</b> Успешное выполнение операции
+<b>Примечания:</b> Проверить сообщение об успехе
+
+❌ <u>ТЕСТ-КЕЙС 2: НЕГАТИВНЫЙ СЦЕНАРИЙ</u>
+<b>Цель:</b> Проверка валидации неверных данных
+<b>Шаги:</b>
+1. Ввести невалидные данные в обязательное поле
+2. Попытаться отправить форму
+<b>Ожидаемый результат:</b> Отображение понятной ошибки
+<b>Примечания:</b> Проверить подсветку неверного поля
+
+⚠️ <u>ТЕСТ-КЕЙС 3: ГРАНИЧНЫЙ СЛУЧАЙ</u>
+<b>Цель:</b> Проверка обработки максимального объема
+<b>Шаги:</b>
+1. Ввести максимально допустимое количество символов
+2. Проверить отображение и поведение
+<b>Ожидаемый результат:</b> Данные принимаются без ошибок
+</div>
+    `;
+  } else {
+    return `
+<div class="ai-response">
+🐛 <b>БАГ-РЕПОРТ</b>
+─────────────────────────────
+<i>Пример ответа от ИИ</i>
+
+<b>Title:</b> Кнопка "Отправить" не активна после заполнения формы
+
+<b>Environment:</b>
+• Браузер: Chrome 122.0.0.0
+• ОС: Windows 11
+• Устройство: Desktop
+• Версия: 2.5.1
+
+<b>Steps to Reproduce:</b>
+1. Открыть страницу с формой
+2. Заполнить все обязательные поля валидными данными
+3. Наблюдать за состоянием кнопки "Отправить"
+
+<b>Expected Result:</b>
+Кнопка "Отправить" становится активной (кликабельной)
+
+<b>Actual Result:</b>
+Кнопка "Отправить" остается неактивной (disabled)
+
+<b>Evidence:</b>
+Скриншот формы с заполненными полями и неактивной кнопкой
+
+<b>Severity:</b> Major
+<b>Priority:</b> High
+
+<b>Additional Context:</b>
+• Репроизводится: Всегда
+• Блокирует отправку данных
+• Найдено при тестировании новой версии
+</div>
+    `;
   }
-  
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || 'Ошибка обработки запроса ИИ');
-  }
-  
-  return data.result;
 }
 
 // ===== ПРОМПТЫ =====
@@ -147,27 +240,18 @@ function createTestDesignPrompt(input, type) {
 Что тестируем: ${input}
 Тип тестирования: ${type}
 
-Требования к ответу:
-1. Дай заголовок "🎯 ТЕСТ-ДИЗАЙН ДЛЯ: [название функции]"
-2. Добавь краткое описание что тестируем
-3. Создай тест-кейсы в формате:
-   ─────────────────
-   ✅ ТЕСТ-КЕЙС №X: [Название]
-   • Цель: [Цель тестирования]
-   • Предусловия: [Что нужно перед тестом]
-   • Шаги:
-     1. [Шаг 1]
-     2. [Шаг 2]
-     3. [Шаг 3]
-   • Ожидаемый результат: [Что должно произойти]
-   • Приоритет: [High/Medium/Low]
-   ─────────────────
+Создай тест-кейсы в формате:
+1. Позитивные сценарии (3-5 кейсов)
+2. Негативные сценарии (3-5 кейсов) 
+3. Edge-кейсы (2-3 кейса)
+4. Валидацию данных
 
-Включи:
-- 3-5 позитивных сценариев
-- 3-5 негативных сценариев
-- 2-3 граничных случая
-- Проверку валидации данных
+Формат каждого тест-кейса:
+• Цель
+• Предусловия  
+• Шаги (нумерованный список)
+• Ожидаемый результат
+• Приоритет (High/Medium/Low)
 
 Отвечай на русском языке, используй Markdown разметку для форматирования.`;
 }
@@ -189,43 +273,14 @@ ${actual}
 Серьезность: ${severity}
 Приоритет: ${priority}
 
-Требования к баг-репорту:
-1. Заголовок: "🐛 БАГ-РЕПОРТ: [Краткое описание]"
-2. Формат:
-   ─────────────────
-   🔍 ОПИСАНИЕ БАГА
-   [Детальное описание проблемы]
-   
-   🎯 ШАГИ ВОСПРОИЗВЕДЕНИЯ
-   1. [Шаг 1]
-   2. [Шаг 2]
-   3. [Шаг 3]
-   
-   ✅ ОЖИДАЕМЫЙ РЕЗУЛЬТАТ
-   [Что должно было произойти]
-   
-   ❌ ФАКТИЧЕСКИЙ РЕЗУЛЬТАТ
-   [Что произошло на самом деле]
-   
-   📊 СЕРЬЕЗНОСТЬ И ПРИОРИТЕТ
-   • Серьезность: ${severity} - [объяснение]
-   • Приоритет: ${priority} - [объяснение]
-   
-   🖥️ ОКРУЖЕНИЕ
-   • Браузер: [укажи типовые браузеры]
-   • ОС: [укажи типовые ОС]
-   • Устройство: [укажи типовые устройства]
-   
-   📎 ПРИЛОЖЕНИЯ
-   • Скриншоты ошибки
-   • Логи (если есть)
-   • Видеозапись (если есть)
-   
-   🏷️ ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ
-   • Репроизводимость: [Всегда/Иногда/Редко]
-   • Блокирует ли функционал: [Да/Нет]
-   • Версия приложения: [укажи если известна]
-   ─────────────────
+Создай баг-репорт с разделами:
+1. Описание бага
+2. Шаги воспроизведения  
+3. Ожидаемый vs Фактический результат
+4. Серьезность и Приоритет с объяснением
+5. Окружение (браузер, ОС, устройство)
+6. Приложения (скриншоты, логи)
+7. Дополнительная информация
 
 Отвечай на русском языке, используй Markdown разметку для форматирования.`;
 }
@@ -250,11 +305,9 @@ function formatAIResponse(text) {
   // Списки
   html = html.replace(/^\* (.*$)/gm, '<li>$1</li>');
   html = html.replace(/^- (.*$)/gm, '<li>$1</li>');
-  html = html.replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>');
   
   // Нумерованные списки
   html = html.replace(/^\d+\. (.*$)/gm, '<li>$1</li>');
-  html = html.replace(/(<li>.*<\/li>)/gs, '<ol>$1</ol>');
   
   // Разделители
   html = html.replace(/^─+$/gm, '<hr>');
@@ -262,7 +315,7 @@ function formatAIResponse(text) {
   // Сохраняем переносы строк
   html = html.replace(/\n/g, '<br>');
   
-  // Добавляем классы для стилизации
+  // Добавляем эмодзи классы
   html = html.replace(/🎯/g, '<span class="emoji-title">🎯</span>');
   html = html.replace(/🐛/g, '<span class="emoji-title">🐛</span>');
   html = html.replace(/✅/g, '<span class="emoji-success">✅</span>');
@@ -294,7 +347,6 @@ function copyResult(elementId) {
   
   navigator.clipboard.writeText(text)
     .then(() => {
-      // Показываем уведомление
       showNotification('✅ Скопировано в буфер обмена!');
     })
     .catch(err => {
@@ -312,67 +364,120 @@ function clearResult(elementId) {
 }
 
 function showNotification(message) {
-  // Создаем уведомление
   const notification = document.createElement('div');
-  notification.className = 'notification';
-  notification.innerHTML = `
-    <div style="
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #10b981;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 9999;
-      animation: slideIn 0.3s ease;
-    ">
-      ${message}
-    </div>
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #10b981;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 9999;
+    animation: slideIn 0.3s ease;
   `;
+  notification.textContent = message;
   
   document.body.appendChild(notification);
   
-  // Удаляем через 3 секунды
   setTimeout(() => {
     notification.remove();
   }, 3000);
 }
 
-// ===== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА =====
+// ===== УПРАВЛЕНИЕ РЕЖИМАМИ =====
 
-function updateUI() {
-  // Обновляем все статусы на "ИИ"
-  const modeStatuses = document.querySelectorAll('.mode-status');
-  modeStatuses.forEach(status => {
+function toggleMode(toolNumber) {
+  const toggle = document.getElementById(`modeToggle${toolNumber}`);
+  const status = document.getElementById(`modeStatus${toolNumber}`);
+  
+  if (toggle.checked) {
     status.textContent = 'ИИ';
     status.style.color = '#10b981';
-  });
-  
-  // Включаем все переключатели
-  const toggles = document.querySelectorAll('.switch input');
-  toggles.forEach(toggle => {
-    toggle.checked = true;
-  });
-  
-  // Обновляем заголовки инструментов
-  const toolSubtitles = document.querySelectorAll('.tool-subtitle');
-  toolSubtitles.forEach(subtitle => {
-    subtitle.innerHTML = '<i class="fas fa-bolt" style="color: #10b981;"></i> Работает на реальном ИИ DeepSeek';
-  });
-  
-  // Обновляем подвал
-  const currentMode = document.getElementById('currentMode');
-  if (currentMode) {
-    currentMode.textContent = 'Режим: ИИ (DeepSeek)';
+  } else {
+    status.textContent = 'Демо';
+    status.style.color = '';
+    CONFIG.demoMode = true;
+  }
+}
+
+// ===== МОДАЛЬНОЕ ОКНО =====
+
+function openModal() {
+  document.getElementById('aiSetupModal').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('aiSetupModal').style.display = 'none';
+}
+
+function copyProxyUrl() {
+  const proxyUrl = document.getElementById('proxyUrl').textContent;
+  navigator.clipboard.writeText(proxyUrl)
+    .then(() => {
+      showNotification('✅ URL скопирован!');
+    })
+    .catch(err => {
+      showNotification('❌ Ошибка копирования: ' + err);
+    });
+}
+
+function saveAPIUrl() {
+  const url = document.getElementById('apiUrlInput').value.trim();
+  if (!url) {
+    alert('Введите URL');
+    return;
   }
   
-  // Обновляем герою
-  const heroSubtitle = document.querySelector('.hero-subtitle');
-  if (heroSubtitle) {
-    heroSubtitle.innerHTML = 'Генерация тест-кейсов и баг-репортов с помощью <strong style="color: #10b981;">реального искусственного интеллекта</strong>';
+  CONFIG.apiUrl = url;
+  localStorage.setItem('qa_ai_api_url', url);
+  CONFIG.demoMode = false;
+  
+  // Обновляем переключатели
+  const toggle1 = document.getElementById('modeToggle1');
+  const toggle2 = document.getElementById('modeToggle2');
+  const status1 = document.getElementById('modeStatus1');
+  const status2 = document.getElementById('modeStatus2');
+  
+  if (toggle1) toggle1.checked = true;
+  if (toggle2) toggle2.checked = true;
+  if (status1) {
+    status1.textContent = 'ИИ';
+    status1.style.color = '#10b981';
   }
+  if (status2) {
+    status2.textContent = 'ИИ';
+    status2.style.color = '#10b981';
+  }
+  
+  alert('✅ URL сохранен! ИИ режим активирован.');
+  closeModal();
+}
+
+function testConnection() {
+  showLoadingScreen();
+  
+  const testPrompt = 'Тестовый запрос: напиши "Подключение к ИИ работает успешно!"';
+  
+  fetch(CONFIG.apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: testPrompt, type: 'test-design' })
+  })
+  .then(response => response.json())
+  .then(data => {
+    hideLoadingScreen();
+    if (data.success) {
+      alert('✅ Подключение к ИИ работает отлично!\n\nОтвет ИИ: "' + data.result.substring(0, 100) + '..."');
+    } else {
+      alert('❌ Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+    }
+  })
+  .catch(error => {
+    hideLoadingScreen();
+    alert('❌ Ошибка сети: ' + error.message);
+  });
 }
 
 // ===== СЧЕТЧИК ЗАПРОСОВ =====
@@ -404,77 +509,6 @@ function updateRequestCounter() {
 function toggleMenu() {
   const navLinks = document.querySelector('.nav-links');
   navLinks.classList.toggle('active');
-}
-
-function toggleMode(toolNumber) {
-  // В этом режиме всегда ИИ, но показываем информацию
-  const toggle = document.getElementById(`modeToggle${toolNumber}`);
-  const status = document.getElementById(`modeStatus${toolNumber}`);
-  
-  if (!toggle.checked) {
-    // Если попытались выключить ИИ
-    showNotification('ℹ️ ИИ всегда включен в этом режиме работы');
-    toggle.checked = true;
-    status.textContent = 'ИИ';
-    status.style.color = '#10b981';
-  }
-}
-
-// Модальное окно - теперь просто информация
-function openModal() {
-  document.getElementById('aiSetupModal').style.display = 'block';
-  
-  // Обновляем содержимое модалки
-  const modalHeader = document.querySelector('.modal-header h2');
-  if (modalHeader) {
-    modalHeader.innerHTML = '<i class="fas fa-rocket"></i> ИИ уже работает!';
-  }
-  
-  const steps = document.querySelectorAll('.step-content');
-  if (steps[0]) {
-    steps[0].innerHTML = `
-      <h3><i class="fas fa-check-circle" style="color: #10b981;"></i> ИИ интегрирован</h3>
-      <p>Сайт уже использует DeepSeek API через безопасный прокси</p>
-    `;
-  }
-  
-  const modalFooter = document.querySelector('.modal-footer');
-  if (modalFooter) {
-    modalFooter.innerHTML = `
-      <button class="btn-test" onclick="testAIConnection()">
-        <i class="fas fa-vial"></i> Протестировать ИИ подключение
-      </button>
-    `;
-  }
-}
-
-function closeModal() {
-  document.getElementById('aiSetupModal').style.display = 'none';
-}
-
-function testAIConnection() {
-  showLoadingScreen();
-  
-  const testPrompt = 'Привет! Напиши короткое приветственное сообщение для пользователя QA Assistant AI.';
-  
-  fetch(CONFIG.apiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt: testPrompt, type: 'test-design' })
-  })
-  .then(response => response.json())
-  .then(data => {
-    hideLoadingScreen();
-    if (data.success) {
-      alert('✅ ИИ подключение работает отлично!\n\nИИ ответил: "' + data.result.substring(0, 100) + '..."');
-    } else {
-      alert('❌ Ошибка: ' + (data.error || 'Неизвестная ошибка'));
-    }
-  })
-  .catch(error => {
-    hideLoadingScreen();
-    alert('❌ Ошибка сети: ' + error.message);
-  });
 }
 
 // Закрытие модалки при клике вне ее
@@ -509,35 +543,6 @@ style.textContent = `
       transform: translateX(0);
       opacity: 1;
     }
-  }
-  
-  .emoji-title { font-size: 1.2em; margin-right: 8px; }
-  .emoji-success { color: #10b981; margin-right: 5px; }
-  .emoji-error { color: #ef4444; margin-right: 5px; }
-  .emoji-warning { color: #f59e0b; margin-right: 5px; }
-  
-  .ai-response {
-    line-height: 1.6;
-  }
-  
-  .ai-response h1, .ai-response h2, .ai-response h3 {
-    margin: 1em 0 0.5em 0;
-    color: #1e293b;
-  }
-  
-  .ai-response ul, .ai-response ol {
-    margin: 0.5em 0 0.5em 1.5em;
-    padding-left: 1em;
-  }
-  
-  .ai-response li {
-    margin: 0.3em 0;
-  }
-  
-  .ai-response hr {
-    border: none;
-    border-top: 2px dashed #e2e8f0;
-    margin: 2em 0;
   }
 `;
 document.head.appendChild(style);
