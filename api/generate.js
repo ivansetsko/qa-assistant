@@ -1,35 +1,50 @@
-// api/generate.js
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+const API_KEY = 'sk-db2a9896c81a4cc18c5bd77a2b83a38e';
 
-  const { prompt, type } = req.body;
-
-  const systemPrompt = type === 'test-design' 
-    ? 'Ты — старший QA инженер. Создай подробные тест-кейсы на основе описания.'
-    : 'Ты — QA lead. Создай профессиональный баг-репорт.';
-
+function doPost(e) {
   try {
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
+    const data = JSON.parse(e.postData.contents);
+    const { prompt, type } = data;
+    
+    let systemPrompt = '';
+    if (type === 'test-design') {
+      systemPrompt = 'Ты — опытный QA инженер. Создай подробные тест-кейсы на русском языке. Отвечай в формате Markdown.';
+    } else {
+      systemPrompt = 'Ты — QA lead. Создай профессиональный баг-репорт на русском языке. Отвечай в формате Markdown.';
+    }
+    
+    const response = UrlFetchApp.fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
+        'Authorization': `Bearer ${API_KEY}`
       },
-      body: JSON.stringify({
+      payload: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }
         ],
-        max_tokens: 1000
+        max_tokens: 2000
       })
     });
-
-    const data = await response.json();
-    res.status(200).json({ result: data.choices[0].message.content });
+    
+    const result = JSON.parse(response.getContentText());
+    const content = result.choices[0].message.content;
+    
+    return ContentService
+      .createTextOutput(JSON.stringify({ 
+        success: true, 
+        result: content 
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error:', error);
+    return ContentService
+      .createTextOutput(JSON.stringify({ 
+        success: false, 
+        error: error.toString() 
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }

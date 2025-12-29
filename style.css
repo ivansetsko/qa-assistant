@@ -844,3 +844,88 @@ footer {
         flex-wrap: wrap;
     }
 }
+/* Добавьте в конец style.css */
+.ai-response {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    line-height: 1.6;
+}
+
+.ai-response h1 {
+    font-size: 1.5em;
+    color: #4f46e5;
+    margin: 1em 0 0.5em 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.3em;
+}
+
+.ai-response h2 {
+    font-size: 1.3em;
+    color: #1e293b;
+    margin: 1em 0 0.5em 0;
+}
+
+.ai-response h3 {
+    font-size: 1.1em;
+    color: #475569;
+    margin: 0.8em 0 0.3em 0;
+}
+
+.ai-response ul, .ai-response ol {
+    margin: 0.5em 0 0.5em 1.5em;
+    padding-left: 1em;
+}
+
+.ai-response li {
+    margin: 0.3em 0;
+}
+
+.ai-response strong {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.ai-response em {
+    color: #64748b;
+    font-style: italic;
+}
+
+.ai-response hr {
+    border: none;
+    border-top: 2px dashed #e2e8f0;
+    margin: 2em 0;
+}
+
+.emoji-title {
+    font-size: 1.2em;
+    margin-right: 8px;
+}
+
+.emoji-success {
+    color: #10b981;
+    margin-right: 5px;
+}
+
+.emoji-error {
+    color: #ef4444;
+    margin-right: 5px;
+}
+
+.emoji-warning {
+    color: #f59e0b;
+    margin-right: 5px;
+}
+
+.notification {
+    animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
