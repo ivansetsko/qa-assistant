@@ -3,152 +3,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QA Assistant AI</title>
+    <title>QA Assistant AI - ИИ для тестировщиков</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
 </head>
 <body>
     <!-- Шапка -->
     <header>
         <nav>
-            <div class="logo">QA Assistant AI</div>
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <span>QA Assistant AI</span>
+            </div>
             <ul class="nav-links">
-                <li><a href="#home" class="active">Главная</a></li>
-                <li><a href="#tools">Инструменты</a></li>
-                <li><a href="#templates">Шаблоны</a></li>
-                <li><a href="#about">О проекте</a></li>
+                <li><a href="#home" class="active"><i class="fas fa-home"></i> Главная</a></li>
+                <li><a href="#tools"><i class="fas fa-tools"></i> Инструменты</a></li>
+                <li><a href="#" onclick="openModal()"><i class="fas fa-cog"></i> Настройка ИИ</a></li>
             </ul>
-            <button class="menu-btn">☰</button>
+            <button class="mobile-menu-btn" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
         </nav>
     </header>
 
+    <!-- Модальное окно настройки ИИ -->
+    <div id="aiSetupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-rocket"></i> Подключение реального ИИ</h2>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+            </div>
+            
+            <div class="setup-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3><i class="fas fa-key"></i> Получи API ключ</h3>
+                        <p>Бесплатно на <a href="https://platform.deepseek.com" target="_blank">DeepSeek</a></p>
+                        <p>→ Зарегистрируйся → API Keys → Create new key</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3><i class="fas fa-code"></i> Готовый прокси-скрипт</h3>
+                        <p>Используй этот URL (уже настроен):</p>
+                        <div class="api-url-box">
+                            <code id="proxyUrl">https://script.google.com/macros/s/AKfycbz4qUMqL5n7p6AzcoBdX7nZ-OKF1K8pPkSjeaTv-SVxKY3o-Ba6fXQ10yW7YHX2_2HD/exec</code>
+                            <button class="btn-copy" onclick="copyProxyUrl()">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <p class="small-text">Или создай свой через Google Apps Script</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3><i class="fas fa-plug"></i> Вставь ссылку</h3>
+                        <input type="text" 
+                               id="apiUrlInput" 
+                               placeholder="https://script.google.com/macros/s/..."
+                               value="https://script.google.com/macros/s/AKfycbz4qUMqL5n7p6AzcoBdX7nZ-OKF1K8pPkSjeaTv-SVxKY3o-Ba6fXQ10yW7YHX2_2HD/exec">
+                        <button class="btn-save" onclick="saveAPIUrl()">
+                            <i class="fas fa-save"></i> Сохранить
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3><i class="fas fa-bolt"></i> Включи ИИ режим</h3>
+                        <p>Нажми переключатель "ИИ" на инструментах</p>
+                        <div class="mode-info">
+                            <span class="mode-demo"><i class="fas fa-play-circle"></i> Демо</span>
+                            <span class="mode-ai"><i class="fas fa-brain"></i> ИИ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-test" onclick="testConnection()">
+                    <i class="fas fa-vial"></i> Протестировать подключение
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Главный экран -->
-    <section class="hero" id="home">
-        <h1>🎯 ИИ-инструменты для тестировщиков</h1>
-        <p>Генерация тест-кейсов и баг-репортов с помощью искусственного интеллекта</p>
-        <div class="features">
-            <div class="feature">
-                <i class="fas fa-bolt"></i>
-                <h3>Быстро</h3>
-                <p>30 секунд вместо часов работы</p>
+    <main id="home">
+        <section class="hero">
+            <div class="hero-content">
+                <h1><i class="fas fa-magic"></i> ИИ-инструменты для тестировщиков</h1>
+                <p class="hero-subtitle">Генерация тест-кейсов и баг-репортов с помощью искусственного интеллекта</p>
+                
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3>Быстро</h3>
+                        <p>30 секунд вместо часов ручной работы</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>Умно</h3>
+                        <p>ИИ предлагает edge-кейсы и сценарии</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-lock-open"></i>
+                        </div>
+                        <h3>Бесплатно</h3>
+                        <p>Полностью бесплатный сервис</p>
+                    </div>
+                </div>
             </div>
-            <div class="feature">
-                <i class="fas fa-robot"></i>
-                <h3>Умно</h3>
-                <p>ИИ генерирует edge-кейсы</p>
-            </div>
-            <div class="feature">
-                <i class="fas fa-free-code-camp"></i>
-                <h3>Бесплатно</h3>
-                <p>Полностью бесплатный сервис</p>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Инструмент 1: Генератор тест-дизайна -->
-    <section class="tool-section" id="tools">
-        <div class="container">
-            <h2><i class="fas fa-vial"></i> Генератор тест-дизайна</h2>
-            <p class="subtitle">Создай тест-кейсы за 30 секунд</p>
-            
-            <div class="tool-card">
-                <textarea id="testInput" placeholder="Опишите функцию для тестирования...&#10;Пример: 'Форма логина с email, паролем и кнопкой Войти'"></textarea>
-                
-                <div class="options">
-                    <select id="testType">
-                        <option>Функциональное тестирование</option>
-                        <option>UI/UX тестирование</option>
-                        <option>API тестирование</option>
-                        <option>Тестирование безопасности</option>
-                    </select>
-                </div>
-                
-                <button class="btn-generate" onclick="generateTestCases()">
-                    <i class="fas fa-magic"></i> Сгенерировать тест-кейсы
-                </button>
-                
-                <div class="result-box">
-                    <div class="result-header">
-                        <h3><i class="fas fa-file-alt"></i> Результат:</h3>
-                        <button class="btn-copy" onclick="copyResult('testOutput')">
-                            <i class="fas fa-copy"></i> Копировать
-                        </button>
-                    </div>
-                    <div class="result-content" id="testOutput">
-                        Здесь появятся тест-кейсы...
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Инструмент 2: Генератор баг-репортов -->
-    <section class="tool-section" id="tools">
-        <div class="container">
-            <h2><i class="fas fa-bug"></i> Генератор баг-репортов</h2>
-            <p class="subtitle">Создай профессиональный отчет за минуту</p>
-            
-            <div class="tool-card">
-                <input type="text" id="bugTitle" placeholder="Краткое описание проблемы...">
-                
-                <textarea id="bugSteps" placeholder="Шаги воспроизведения..."></textarea>
-                
-                <div class="grid">
-                    <div>
-                        <label>Ожидаемый результат:</label>
-                        <textarea id="expected" rows="2"></textarea>
-                    </div>
-                    <div>
-                        <label>Фактический результат:</label>
-                        <textarea id="actual" rows="2"></textarea>
+        <!-- Инструменты -->
+        <section class="tools-section" id="tools">
+            <!-- Инструмент 1: Генератор тест-дизайна -->
+            <div class="tool-container">
+                <div class="tool-header">
+                    <h2><i class="fas fa-vial"></i> Генератор тест-дизайна</h2>
+                    <p class="tool-subtitle">Создай тест-кейсы за 30 секунд</p>
+                    
+                    <div class="mode-switcher">
+                        <span class="mode-label">Режим:</span>
+                        <label class="switch">
+                            <input type="checkbox" id="modeToggle1" onchange="toggleMode(1)">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="mode-status" id="modeStatus1">Демо</span>
+                        <span class="requests-count" id="requestsCount1">Запросов: 0</span>
                     </div>
                 </div>
                 
-                <div class="grid">
-                    <div>
-                        <label>Серьезность:</label>
-                        <select id="severity">
-                            <option>Critical</option>
-                            <option>Major</option>
-                            <option>Minor</option>
+                <div class="tool-body">
+                    <div class="input-group">
+                        <label for="testInput"><i class="fas fa-edit"></i> Описание функции:</label>
+                        <textarea 
+                            id="testInput" 
+                            class="text-input"
+                            placeholder="Опиши что тестируем...&#10;Пример: Форма входа с полями email, пароль, кнопка 'Войти', ссылка 'Забыли пароль'"
+                            rows="5"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="testType"><i class="fas fa-filter"></i> Тип тестирования:</label>
+                        <select id="testType" class="select-input">
+                            <option value="functional">Функциональное тестирование</option>
+                            <option value="ui">UI/UX тестирование</option>
+                            <option value="api">API тестирование</option>
+                            <option value="security">Тестирование безопасности</option>
+                            <option value="performance">Тестирование производительности</option>
                         </select>
                     </div>
-                    <div>
-                        <label>Приоритет:</label>
-                        <select id="priority">
-                            <option>High</option>
-                            <option>Medium</option>
-                            <option>Low</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <button class="btn-generate" onclick="generateBugReport()" style="background: #ef4444;">
-                    <i class="fas fa-file-medical"></i> Создать баг-репорт
-                </button>
-                
-                <div class="result-box">
-                    <div class="result-header">
-                        <h3><i class="fas fa-bug"></i> Баг-репорт:</h3>
-                        <button class="btn-copy" onclick="copyResult('bugOutput')">
-                            <i class="fas fa-copy"></i> Копировать
-                        </button>
-                    </div>
-                    <div class="result-content" id="bugOutput">
-                        Здесь появится баг-репорт...
+                    
+                    <button class="btn-generate" onclick="generateTestCases()">
+                        <i class="fas fa-magic"></i> Сгенерировать тест-кейсы
+                    </button>
+                    
+                    <div class="result-container">
+                        <div class="result-header">
+                            <h3><i class="fas fa-file-alt"></i> Результат:</h3>
+                            <div class="result-actions">
+                                <button class="btn-copy-small" onclick="copyResult('testOutput')" title="Копировать">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="btn-copy-small" onclick="clearResult('testOutput')" title="Очистить">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="result-content" id="testOutput">
+                            <div class="placeholder-text">
+                                <i class="fas fa-lightbulb"></i>
+                                <p>Здесь появятся тест-кейсы...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+
+            <!-- Инструмент 2: Генератор баг-репортов -->
+            <div class="tool-container">
+                <div class="tool-header">
+                    <h2><i class="fas fa-bug"></i> Генератор баг-репортов</h2>
+                    <p class="tool-subtitle">Создай профессиональный отчет за минуту</p>
+                    
+                    <div class="mode-switcher">
+                        <span class="mode-label">Режим:</span>
+                        <label class="switch">
+                            <input type="checkbox" id="modeToggle2" onchange="toggleMode(2)">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="mode-status" id="modeStatus2">Демо</span>
+                        <span class="requests-count" id="requestsCount2">Запросов: 0</span>
+                    </div>
+                </div>
+                
+                <div class="tool-body">
+                    <div class="input-group">
+                        <label for="bugTitle"><i class="fas fa-heading"></i> Название бага:</label>
+                        <input 
+                            type="text" 
+                            id="bugTitle" 
+                            class="text-input"
+                            placeholder="Кратко опиши проблему...">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="bugSteps"><i class="fas fa-list-ol"></i> Шаги воспроизведения:</label>
+                        <textarea 
+                            id="bugSteps" 
+                            class="text-input"
+                            placeholder="Опиши шаги по порядку...&#10;1. Открыть страницу&#10;2. Нажать кнопку&#10;3. Наблюдать проблему"
+                            rows="4"></textarea>
+                    </div>
+                    
+                    <div class="columns">
+                        <div class="column">
+                            <div class="input-group">
+                                <label for="expected"><i class="fas fa-check-circle"></i> Ожидаемый результат:</label>
+                                <textarea 
+                                    id="expected" 
+                                    class="text-input"
+                                    placeholder="Что должно было произойти..."
+                                    rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="input-group">
+                                <label for="actual"><i class="fas fa-times-circle"></i> Фактический результат:</label>
+                                <textarea 
+                                    id="actual" 
+                                    class="text-input"
+                                    placeholder="Что произошло на самом деле..."
+                                    rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="columns">
+                        <div class="column">
+                            <div class="input-group">
+                                <label for="severity"><i class="fas fa-exclamation-triangle"></i> Серьезность:</label>
+                                <select id="severity" class="select-input">
+                                    <option value="Critical">Critical — Критическая</option>
+                                    <option value="Major" selected>Major — Значительная</option>
+                                    <option value="Minor">Minor — Незначительная</option>
+                                    <option value="Cosmetic">Cosmetic — Косметическая</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="input-group">
+                                <label for="priority"><i class="fas fa-flag"></i> Приоритет:</label>
+                                <select id="priority" class="select-input">
+                                    <option value="High">High — Высокий</option>
+                                    <option value="Medium" selected>Medium — Средний</option>
+                                    <option value="Low">Low — Низкий</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-generate" onclick="generateBugReport()" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                        <i class="fas fa-file-medical"></i> Создать баг-репорт
+                    </button>
+                    
+                    <div class="result-container">
+                        <div class="result-header">
+                            <h3><i class="fas fa-bug"></i> Баг-репорт:</h3>
+                            <div class="result-actions">
+                                <button class="btn-copy-small" onclick="copyResult('bugOutput')" title="Копировать">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="btn-copy-small" onclick="clearResult('bugOutput')" title="Очистить">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="result-content" id="bugOutput">
+                            <div class="placeholder-text">
+                                <i class="fas fa-lightbulb"></i>
+                                <p>Здесь появится баг-репорт...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Информационный блок -->
+        <section class="info-section">
+            <div class="info-container">
+                <h2><i class="fas fa-question-circle"></i> Как это работает?</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-keyboard"></i>
+                        </div>
+                        <h3>1. Описываешь</h3>
+                        <p>Просто напиши что нужно протестировать или опиши баг</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>2. ИИ анализирует</h3>
+                        <p>Искусственный интеллект создает оптимальные тест-кейсы или баг-репорт</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <h3>3. Получаешь результат</h3>
+                        <p>Готовые материалы для работы. Копируй и используй!</p>
+                    </div>
+                </div>
+                
+                <div class="demo-note">
+                    <i class="fas fa-info-circle"></i>
+                    <p><strong>Демо-режим:</strong> Работает сразу без настройки. <strong>ИИ-режим:</strong> Требует настройки (кнопка "Настройка ИИ" в шапке).</p>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <!-- Подвал -->
     <footer>
-        <div class="container">
-            <p>QA Assistant AI &copy; 2024 | Бесплатные ИИ-инструменты для тестировщиков</p>
-            <p class="small">Это демо-версия. Для реальной работы с ИИ нужен API ключ.</p>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <i class="fas fa-robot"></i>
+                <span>QA Assistant AI</span>
+            </div>
+            <p class="footer-text">Бесплатные ИИ-инструменты для автоматизации тестирования</p>
+            <div class="footer-stats">
+                <span id="totalRequests">Всего запросов: 0</span>
+                <span>•</span>
+                <span id="currentMode">Режим: Демо</span>
+                <span>•</span>
+                <span>Версия: 2.0</span>
+            </div>
+            <p class="footer-copyright">
+                © 2024 QA Assistant AI | 
+                <a href="https://github.com/ваш-логин/qa-assistant-ai" target="_blank">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+            </p>
         </div>
     </footer>
+
+    <!-- Загрузочный экран -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loader">
+            <div class="loader-spinner"></div>
+            <p>ИИ генерирует ответ...</p>
+            <p class="loader-sub">Это может занять 10-15 секунд</p>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
