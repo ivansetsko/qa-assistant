@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Assistant AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Шапка -->
+    <header>
+        <nav>
+            <div class="logo">QA Assistant AI</div>
+            <ul class="nav-links">
+                <li><a href="#home" class="active">Главная</a></li>
+                <li><a href="#tools">Инструменты</a></li>
+                <li><a href="#templates">Шаблоны</a></li>
+                <li><a href="#about">О проекте</a></li>
+            </ul>
+            <button class="menu-btn">☰</button>
+        </nav>
+    </header>
+
+    <!-- Главный экран -->
+    <section class="hero" id="home">
+        <h1>🎯 ИИ-инструменты для тестировщиков</h1>
+        <p>Генерация тест-кейсов и баг-репортов с помощью искусственного интеллекта</p>
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-bolt"></i>
+                <h3>Быстро</h3>
+                <p>30 секунд вместо часов работы</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-robot"></i>
+                <h3>Умно</h3>
+                <p>ИИ генерирует edge-кейсы</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-free-code-camp"></i>
+                <h3>Бесплатно</h3>
+                <p>Полностью бесплатный сервис</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Инструмент 1: Генератор тест-дизайна -->
+    <section class="tool-section" id="tools">
+        <div class="container">
+            <h2><i class="fas fa-vial"></i> Генератор тест-дизайна</h2>
+            <p class="subtitle">Создай тест-кейсы за 30 секунд</p>
+            
+            <div class="tool-card">
+                <textarea id="testInput" placeholder="Опишите функцию для тестирования...&#10;Пример: 'Форма логина с email, паролем и кнопкой Войти'"></textarea>
+                
+                <div class="options">
+                    <select id="testType">
+                        <option>Функциональное тестирование</option>
+                        <option>UI/UX тестирование</option>
+                        <option>API тестирование</option>
+                        <option>Тестирование безопасности</option>
+                    </select>
+                </div>
+                
+                <button class="btn-generate" onclick="generateTestCases()">
+                    <i class="fas fa-magic"></i> Сгенерировать тест-кейсы
+                </button>
+                
+                <div class="result-box">
+                    <div class="result-header">
+                        <h3><i class="fas fa-file-alt"></i> Результат:</h3>
+                        <button class="btn-copy" onclick="copyResult('testOutput')">
+                            <i class="fas fa-copy"></i> Копировать
+                        </button>
+                    </div>
+                    <div class="result-content" id="testOutput">
+                        Здесь появятся тест-кейсы...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Инструмент 2: Генератор баг-репортов -->
+    <section class="tool-section" id="tools">
+        <div class="container">
+            <h2><i class="fas fa-bug"></i> Генератор баг-репортов</h2>
+            <p class="subtitle">Создай профессиональный отчет за минуту</p>
+            
+            <div class="tool-card">
+                <input type="text" id="bugTitle" placeholder="Краткое описание проблемы...">
+                
+                <textarea id="bugSteps" placeholder="Шаги воспроизведения..."></textarea>
+                
+                <div class="grid">
+                    <div>
+                        <label>Ожидаемый результат:</label>
+                        <textarea id="expected" rows="2"></textarea>
+                    </div>
+                    <div>
+                        <label>Фактический результат:</label>
+                        <textarea id="actual" rows="2"></textarea>
+                    </div>
+                </div>
+                
+                <div class="grid">
+                    <div>
+                        <label>Серьезность:</label>
+                        <select id="severity">
+                            <option>Critical</option>
+                            <option>Major</option>
+                            <option>Minor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Приоритет:</label>
+                        <select id="priority">
+                            <option>High</option>
+                            <option>Medium</option>
+                            <option>Low</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="btn-generate" onclick="generateBugReport()" style="background: #ef4444;">
+                    <i class="fas fa-file-medical"></i> Создать баг-репорт
+                </button>
+                
+                <div class="result-box">
+                    <div class="result-header">
+                        <h3><i class="fas fa-bug"></i> Баг-репорт:</h3>
+                        <button class="btn-copy" onclick="copyResult('bugOutput')">
+                            <i class="fas fa-copy"></i> Копировать
+                        </button>
+                    </div>
+                    <div class="result-content" id="bugOutput">
+                        Здесь появится баг-репорт...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Подвал -->
+    <footer>
+        <div class="container">
+            <p>QA Assistant AI &copy; 2024 | Бесплатные ИИ-инструменты для тестировщиков</p>
+            <p class="small">Это демо-версия. Для реальной работы с ИИ нужен API ключ.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
