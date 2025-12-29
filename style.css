@@ -832,7 +832,6 @@ footer {
         gap: 1rem;
     }
 }
-
 @media (max-width: 480px) {
     nav {
         padding: 1rem;

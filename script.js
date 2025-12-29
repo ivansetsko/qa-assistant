@@ -4,7 +4,7 @@
 // Конфигурация - ВАШ URL GOOGLE APPS SCRIPT СЮДА
 const CONFIG = {
   demoMode: false, // Сразу включаем ИИ режим
-  apiUrl: 'https://script.google.com/macros/s/AKfycbx-SuOkhe0xDVuKEt-vvXFHdTk0wSe49PM-pQttLHshKcSJdtS22P5kimFs--iSXdU97A-DTWg/exec', // ВАШ URL ЗДЕСЬ
+  apiUrl: 'https://script.google.com/macros/s/AKfycbx-SuOkhe0xDVuKEt-vvXFHdTk0wSe49PM-pQttLHshKcSJdtS22P5kimFs--iSXdU97A/exec', // ВАШ URL ЗДЕСЬ
   requestCount: parseInt(localStorage.getItem('qa_ai_requests')) || 0,
   maxRequestsPerDay: 50
 };
@@ -169,7 +169,7 @@ function createTestDesignPrompt(input, type) {
 - 2-3 граничных случая
 - Проверку валидации данных
 
-Отвечай на русском языке, используй Markdown разметку для форматирования.`;
+Отвечай на русском языке, используйте Markdown разметку для форматирования.`;
 }
 
 function createBugReportPrompt(title, steps, expected, actual, severity, priority) {
@@ -227,7 +227,7 @@ ${actual}
    • Версия приложения: [укажи если известна]
    ─────────────────
 
-Отвечай на русском языке, используй Markdown разметку для форматирования.`;
+Отвечай на русском языке, используйте Markdown разметку для форматирования.`;
 }
 
 // ===== ФОРМАТИРОВАНИЕ ОТВЕТА =====
