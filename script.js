@@ -3,7 +3,7 @@
 
 // Конфигурация - ВАШ URL GOOGLE APPS SCRIPT СЮДА
 const CONFIG = {
-  demoMode: false, // Сразу включаем ИИ режим
+  demoMode: true, // Сразу включаем ИИ режим
   apiUrl: 'https://script.google.com/macros/s/AKfycbx-SuOkhe0xDVuKEt-vvXFHdTk0wSe49PM-pQttLHshKcSJdtS22P5kimFs--iSXdU97A/exec', // ВАШ URL ЗДЕСЬ
   requestCount: parseInt(localStorage.getItem('qa_ai_requests')) || 0,
   maxRequestsPerDay: 50
