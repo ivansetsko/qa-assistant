@@ -332,6 +332,90 @@
                     <i class="fas fa-info-circle"></i>
                     <p><strong>Демо-режим активен!</strong> Примеры генерируются локально без подключения к ИИ.</p>
                 </div>
+                
+                <!-- Новый контент о подходе ИИ в QA -->
+                <div class="approach-section">
+                    <h2 style="margin-top: 3rem; text-align: center;"><i class="fas fa-lightbulb"></i> Примеры использования ИИ в QA</h2>
+                    
+                    <div class="info-card" style="text-align: left; margin-top: 2rem;">
+                        <h3 style="display: flex; align-items: center;"><i class="fas fa-database" style="margin-right: 10px;"></i> Генерация тестовых данных</h3>
+                        <p>ИИ может генерировать разнообразные наборы тестовых данных на основе требований к приложению:</p>
+                        <pre style="background: #f1f5f9; padding: 1rem; border-radius: 8px; margin: 1rem 0; overflow: auto; font-size: 0.9em;">
+// Пример генерации тестовых данных для формы регистрации
+{
+  "users": [
+    {
+      "email": "user1@example.com",
+      "password": "SecurePass123!",
+      "name": "Иван Иванов",
+      "age": 25,
+      "country": "Россия",
+      "isSubscribed": true
+    },
+    {
+      "email": "user2@test.org",
+      "password": "Qwerty567@",
+      "name": "Мария Смирнова", 
+      "age": 32,
+      "country": "Украина",
+      "isSubscribed": false
+    }
+  ]
+}
+                        </pre>
+                    </div>
+                    
+                    <div class="info-card" style="text-align: left; margin-top: 2rem;">
+                        <h3 style="display: flex; align-items: center;"><i class="fas fa-clipboard-list" style="margin-right: 10px;"></i> Анализ логов</h3>
+                        <p>ИИ способен анализировать логи и выявлять аномалии, ошибки и потенциальные проблемы:</p>
+                        <pre style="background: #f1f5f9; padding: 1rem; border-radius: 8px; margin: 1rem 0; overflow: auto; font-size: 0.9em;">
+// Пример анализа логов сервера
+2024-01-15 14:32:45 [ERROR] Connection timeout to database server
+2024-01-15 14:32:46 [WARN] Retry attempt #1 for database connection
+2024-01-15 14:32:50 [ERROR] Failed to connect to database after 3 attempts
+2024-01-15 14:32:50 [ERROR] API request failed: POST /api/users - Status: 500 Internal Server Error
+
+Анализ ИИ:
+- Обнаружена проблема с подключением к базе данных
+- Ошибка произошла во время выполнения POST запроса к /api/users
+- Рекомендуется проверить доступность сервера базы данных и настройки подключения
+                        </pre>
+                    </div>
+                    
+                    <div class="info-card" style="text-align: left; margin-top: 2rem;">
+                        <h3 style="display: flex; align-items: center;"><i class="fas fa-database" style="margin-right: 10px;"></i> Пример SQL-запроса</h3>
+                        <p>ИИ может генерировать сложные SQL-запросы для проверки данных:</p>
+                        <pre style="background: #f1f5f9; padding: 1rem; border-radius: 8px; margin: 1rem 0; overflow: auto; font-size: 0.9em;">
+-- Запрос для проверки корректности данных после миграции
+SELECT 
+    u.id,
+    u.email,
+    u.registration_date,
+    COUNT(o.id) as orders_count,
+    SUM(o.amount) as total_spent
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+WHERE u.registration_date >= '2024-01-01'
+    AND u.status = 'active'
+GROUP BY u.id, u.email, u.registration_date
+HAVING COUNT(o.id) > 10
+ORDER BY total_spent DESC;
+                        </pre>
+                    </div>
+                    
+                    <div class="info-card" style="text-align: left; margin-top: 2rem;">
+                        <h3 style="display: flex; align-items: center;"><i class="fas fa-balance-scale" style="margin-right: 10px;"></i> Ограничения и эффективность ИИ</h3>
+                        <p>Хотя ИИ значительно ускоряет процесс тестирования, важно понимать его ограничения:</p>
+                        <ul style="margin: 1rem 0 1rem 1.5rem; padding-left: 1rem;">
+                            <li><strong>Контекст:</strong> ИИ может не учитывать специфические особенности бизнес-логики приложения</li>
+                            <li><strong>Качество данных:</strong> Качество генерируемых тестов зависит от качества входных данных</li>
+                            <li><strong>Тонкие баги:</strong> ИИ может пропустить сложные или неочевидные ошибки, требующие человеческого восприятия</li>
+                            <li><strong>Эффективность:</strong> Снижает время на создание тест-кейсов на 70-80%, но требует ручной проверки результатов</li>
+                            <li><strong>Обучение:</strong> Для максимальной эффективности требуется время на настройку и обучение модели</li>
+                        </ul>
+                        <p>Несмотря на ограничения, ИИ остается мощным инструментом для автоматизации рутинных задач тестирования, позволяя QA-инженерам сосредоточиться на более сложных аспектах обеспечения качества.</p>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
